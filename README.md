@@ -1,5 +1,7 @@
 Usage: `python avalon.py player1,player2,...,playerN role1,role2,...,roleM`
 
+Example: `python avalon.py alice,bob,charlie,denise,eve,frank,george merlin,percival,morgana`
+
 Player names can be whatever.
 
 Roles are `merlin`, `mordred`, `percival`, `morgana`, `snape`.
