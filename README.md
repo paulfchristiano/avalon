@@ -4,7 +4,7 @@ Example: `python avalon.py alice,bob,charlie,denise,eve,frank,george merlin,perc
 
 Player names can be whatever.
 
-Roles are `merlin`, `mordred`, `percival`, `morgana`, `snape`.
+Roles can be `merlin`, `mordred`, `percival`, `morgana`, `snape`.
 One evil player will be given the role `assassin` if snape or merlin is in the game.
 
 The code is hopefully self-explanatory.
