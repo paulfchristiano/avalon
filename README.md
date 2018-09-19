@@ -1,6 +1,6 @@
 Usage: `python avalon.py player1,player2,...,playerN role1,role2,...,roleM`
 
-Player names can be any string
+Player names can be whatever.
 
 Roles are `merlin`, `mordred`, `percival`, `morgana`, `snape`.
 One evil player will be given the role `assassin` if snape or merlin is in the game.
