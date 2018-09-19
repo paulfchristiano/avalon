@@ -15,6 +15,7 @@ for x in evil_roles: reveals[x] = [("evil players", evil_roles)]
 
 # number of players : (number good, number evil)
 composition = {
+    4: (3, 1),
     5: (3, 2),
     6: (4, 2),
     7: (4, 3),
@@ -25,6 +26,7 @@ composition = {
 
 # number of players : sizes of quests
 quests = {
+    4: (3, 3, 3)
     5: (3, 3, 3),
     6: (4, 3, 4),
     7: (3, 3, 4),
@@ -63,7 +65,7 @@ def main(player_list, used_roles):
         wait()
     clear()
     random.shuffle(player_list)
-    print("Quest sizes: {} / {} / {}".format(*quests[len(player_list)]))
+    print("Three largest quests: {} / {} / {}".format(*quests[len(player_list)]))
     print("Random permutation of players\n{}".format("\n".join(player_list)))
 
 if __name__ == '__main__':
