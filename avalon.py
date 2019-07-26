@@ -26,7 +26,7 @@ composition = {
 
 # number of players : sizes of quests
 quests = {
-    4: (3, 3, 3)
+    4: (3, 3, 3),
     5: (3, 3, 3),
     6: (3, 4, 4),
     7: (3, 3, 4),
