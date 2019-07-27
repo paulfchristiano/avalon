@@ -32,7 +32,7 @@ All roles are randomized. This has a few material changes:
     * Seer looks in middle 50% of the time
     * Witch takes suspicious roles for herself 50% of the time
     * PI always looks at first role, looks at second role 50% of the time
-    * Village idiot doesn't rotate 10% of the time
+    * Village idiot doesn't rotate 20% of the time
     * Troublemaker, robber, and witch always act
     * No one can plan around village idiot affecting nearby locations
     * Village idiot can't choose direction based on shield
@@ -193,7 +193,7 @@ def game(players, roles, lonewolf=True, use_slack=False):
             to_rotate = [j for j in range(N) if j != i and j not in shielded]
             if random.random() < 0.5:
                 to_rotate.reverse()
-            if random.random() < 0.1 or len(to_rotate) < 2:
+            if random.random() < 0.2 or len(to_rotate) < 2:
                 message_and_log(i, "didn't rotate anyone")
             else:
                 rotate_str = ' -> '.join([players[i] for i in to_rotate + [to_rotate[0]]])
