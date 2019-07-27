@@ -1,8 +1,10 @@
 import random
 import os
 import sys
+import json
 from collections import defaultdict, namedtuple
 from copy import copy
+from slack import post_message
 
 def wait():
     input()
@@ -50,7 +52,7 @@ TODO
 class Role():
     def __init__(self, name):
         self.name = name
-        assert name in valid_roles
+        assert name in valid_roles, name
         self.copied = None
         self.mark = None
 
@@ -84,7 +86,7 @@ def reveal(singular, plural, people):
         return f"the {plural} are {', '.join(people[1:])} and {people[0]}"
 
 
-def game(players, roles, lonewolf=True):
+def game(players, roles, lonewolf=True, use_slack=False):
     N = len(players)
     assert len(roles) == N + 3
     roles = [Role(role) for role in roles]
@@ -282,6 +284,11 @@ def game(players, roles, lonewolf=True):
                 j = random.randint(1, 3)
                 message_and_log(wolf, f"looked at middle card {j} and saw {roles[N-1+j]}")
 
+    if use_slack:
+        for i in range(N):
+            messages[i].append("------------------")
+            messages[i].append(f"Seating order: {', '.join(players)}")
+
     for i in range(N):
         message_and_log(i, f"began the night as {roles[i]}")
 
@@ -310,14 +317,23 @@ def game(players, roles, lonewolf=True):
     for i, role in wrapup:
         do_role(i, role)
 
+    if use_slack:
+        for i in range(N):
+            messages[i].append(f"Wake order: {', '.join(wake_order)}")
+        
+
+
     for i, player in enumerate(players):
-        print(f"pass the computer to {player}")
-        wait()
-        clear()
-        for message in messages[i]:
-            print(message)
-        wait()
-        clear()
+        if use_slack:
+            post_message(player, '\n'.join(messages[i]))
+        else:
+            print(f"pass the computer to {player}")
+            wait()
+            clear()
+            for message in messages[i]:
+                print(message)
+            wait()
+            clear()
 
     print("Wake order:")
     print()
@@ -338,9 +354,12 @@ def game(players, roles, lonewolf=True):
     print()
     for player, role in zip(players, roles):
         print(f"{player}: {role.full_str()}")
+    if use_slack:
+        for player in players:
+            post_message(player, '\n'.join(["Log:"] + log))
     wait()
 
 if __name__ == '__main__':
     players = sys.argv[1]
     roles = sys.argv[2]
-    game(players.split(","), roles.split(","))
+    game(players.split(","), roles.split(","), use_slack='slack' in sys.argv)
