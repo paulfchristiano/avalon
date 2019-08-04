@@ -13,15 +13,15 @@ def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 roles_in_category = {
-        "all_wolves": ["werewolf", "alphawolf", "dreamwolf", "mysticwolf"],
+        "all_wolves": ["werewolf", "alphawolf", "dreamwolf", "mysticwolf", "lucidwolf"],
         "see_wolves": ["werewolf", "alphawolf", "mysticwolf", "minion"],
-        "suspicious": ["werewolf", "alphawolf", "dreamwolf", "mysticwolf", "minion", "tanner"]
+        "suspicious": ["werewolf", "alphawolf", "dreamwolf", "mysticwolf", "minion", "tanner", "lucidwolf"]
 }
 
 valid_roles = {"villager", "minion", "werewolf", "doppelganger", "troublemaker",
                "robber", "seer", "mason", "hunter", "bodyguard", "tanner",
                "sentinel", "drunk", "villageidiot", "alphawolf", "mysticwolf", "dreamwolf",
-               "apprenticeseer", "insomniac", "revealer", "witch", "PI", "curator"}
+               "apprenticeseer", "insomniac", "revealer", "witch", "PI", "curator", "lucidwolf", "god"}
 
 marks = ["mark of villager", "mark of werewolf", "mark of tanner",
          "mark of nothing", "mark of shame", "mark of muting"]
@@ -45,7 +45,7 @@ All roles are randomized. This has a few material changes:
     * Doppelganger PI never looks at the PI
 
 TODO
-    * Implement PI, witch, curator
+    * timer
     * (low) handle cases where there are no targets
 """
 
@@ -228,7 +228,10 @@ def game(players, roles, lonewolf=True, use_slack=False):
                         message_and_log(i, f"looked at middle card {k} and saw {roles[N+k-1]}")
         elif role.name == "apprenticeseer":
             j = random.randint(1, 3)
-            message_and_log(i, "looked at middle card {j} and saw {roles[N+j-1]}")
+            message_and_log(i, f"looked at middle card {j} and saw {roles[N+j-1]}")
+        elif role.name == "lucidwolf":
+            j = random.randint(1, 3)
+            message_and_log(i, f"looked at middle card {j} and saw {roles[N+j-1]}")
         elif role.name == "robber":
             if i in shielded:
                 message_and_log(i, f"did nothing, because they were shielded")
@@ -254,6 +257,9 @@ def game(players, roles, lonewolf=True, use_slack=False):
                     messages[i].append(f"{players[i]} ended the night as {roles[i]}")
         elif role.name == "mason":
             messages[i].append(reveal("mason", "masons", [players[i] for i in players_by_role['mason']]))
+        elif role.name == "god":
+            for m in log:
+                messages[i].append(f"[God] {m}")
         elif role.name == "troublemaker":
             if N < 1 + 2 + len(shielded):
                 message_and_log(i, "couldn't switch anybody")
@@ -280,7 +286,7 @@ def game(players, roles, lonewolf=True, use_slack=False):
             messages[player].append(message)
         if len(wolves) == 1 and lonewolf:
             wolf = wolves[0]
-            if wolf not in players_by_role['dreamwolf']:
+            if wolf not in players_by_role['dreamwolf'] + players_by_role['lucidwolf']:
                 j = random.randint(1, 3)
                 message_and_log(wolf, f"looked at middle card {j} and saw {roles[N-1+j]}")
 
@@ -304,6 +310,7 @@ def game(players, roles, lonewolf=True, use_slack=False):
     wake_role("mason")
     wake_role("seer")
     wake_role("apprenticeseer")
+    wake_role("lucidwolf")
     wake_role("PI")
     wake_role("robber")
     wake_role("witch")
@@ -313,13 +320,19 @@ def game(players, roles, lonewolf=True, use_slack=False):
     wake_role("insomniac")
     wake_role("revealer")
     wake_role("curator")
+    wake_role("god")
 
     for i, role in wrapup:
         do_role(i, role)
 
+    def make_wake_order_str(role):
+        num_roles = len([x for x in roles if x.name == role])
+        return role if num_roles == 1 else f"{role} (x{num_roles})"
+
     if use_slack:
+        wake_order_message = f"Wake order: {', '.join([make_wake_order_str(x) for x in wake_order])}"
         for i in range(N):
-            messages[i].append(f"Wake order: {', '.join(wake_order)}")
+            messages[i].append(wake_order_message)
         
 
 
@@ -344,20 +357,13 @@ def game(players, roles, lonewolf=True, use_slack=False):
     print("press any key to see log")
     wait()
     clear()
-    print("Log:")
-    print()
+    log.append("\nFinal roles:")
+    log.extend([f"{player}: {role.full_str()}" for player, role in zip(players, roles)])
     for logline in log:
         print(logline)
-    print()
-    print()
-    print("Final roles:")
-    print()
-    for player, role in zip(players, roles):
-        print(f"{player}: {role.full_str()}")
     if use_slack:
         for player in players:
             post_message(player, '\n'.join(["Log:"] + log))
-    wait()
 
 if __name__ == '__main__':
     players = sys.argv[1]
