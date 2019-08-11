@@ -4,21 +4,26 @@ import os
 
 """
   Instructions:
-  Go to https://openai.slack.com/apps/A0F7YS25R-bots
+  Go to https://<slackdomain>.slack.com/apps/A0F7YS25R-bots
   Make a bot, and download the corresponding token
-  Create a new file slack_token.py, with the single line `slack_token = "..."`
+  Create a new file slack_token.py in this directory, with the single line `slack_token = "..."`
 """
 
-def post_message(username, text):
+def get_slack_ids(usernames):
     client = SlackClient(slack_token)
     users_info = client.api_call("users.list")['members']
-    users_by_name = [x for x in users_info if matches(username, x)]
-    assert len(users_by_name) > 0
-    user_id = users_by_name[0]["id"]
+    def users_by_name(name):
+        return [x['id'] for x in users_info if matches(name, x)]
+    by_name = [(name, users_by_name(name)) for name in usernames]
+    return {name: ids[0] for name, ids in by_name if ids}
 
+def post_message(slack_ids, text):
+    if isinstance(slack_ids, str):
+        slack_ids = [slack_ids]
+    client = SlackClient(slack_token)
     channel = client.api_call(
         "conversations.open",
-        users=[user_id])['channel']['id']
+        users=slack_ids)['channel']['id']
     result = client.api_call(
        "chat.postMessage",
        channel=channel, text=text, as_user=False,
@@ -26,8 +31,6 @@ def post_message(username, text):
        icon_emoji='robot')
     if 'error' in result:
         print(f'Error slacking: {result}')
-    # also print text, regardless
-    #print(f'Slacking: {text}')
 
 def add_reaction(client, event, name):
     client.api_call("reactions.add", channel=event["channel"], name=name, timestamp=event["ts"])
