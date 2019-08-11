@@ -16,7 +16,8 @@ def clear():
 roles_in_category = {
         "all_wolves": ["werewolf", "alphawolf", "dreamwolf", "mysticwolf", "lucidwolf"],
         "see_wolves": ["werewolf", "alphawolf", "mysticwolf", "minion"],
-        "suspicious": ["werewolf", "alphawolf", "dreamwolf", "mysticwolf", "minion", "tanner", "lucidwolf"],
+        "suspicious": ["werewolf", "alphawolf", "dreamwolf", "mysticwolf", "minion", "tanner", "lucidwolf",
+                       "loverwolf", "lovervillager", "god"],
         "lovers": ["loverwolf", "lovervillager"],
 }
 
@@ -159,6 +160,8 @@ def game(players, roles, lonewolf=True, use_slack=False):
             try:
                 j = random_choice(N, [i] + shielded)
                 shielded.append(j)
+                broadcast_and_log(f"{players[j]} was marked with a shield",
+                                  f"{players[i]} marked {players[j]} with a shield")
             except NoTarget:
                 broadcast_and_log(i, "had no one to mark")
         elif role.name == "witch":
@@ -249,7 +252,7 @@ def game(players, roles, lonewolf=True, use_slack=False):
                     message_and_log(i, "had no one to reveal")
         elif role.name == "doppelganger":
             try:
-                j = random_choice(N, [i] + shielded)
+                j = random_choice(N, [i] + shielded + doppelganged)
                 role.copied = Role(roles[j].name)
                 message_and_log(i, f"doppelganged {players[j]}, who was {roles[j]}")
                 players_by_role[role.copied.name].append(i)
